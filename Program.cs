@@ -1,57 +1,16 @@
 using SharlmagneHenryAPI.Data;
+using SharlmagneHenryAPI.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddCors(
-    (
-        options =>
-        {
-            options.AddPolicy(
-                "DevCorsPolicy",
-                builder =>
-                {
-                    builder
-                        .WithOrigins("http://localhost:3000")
-                        .AllowAnyHeader()
-                        .AllowAnyMethod()
-                        .AllowCredentials();
-                }
-            );
-            options.AddPolicy(
-                "ProdCorsPolicy",
-                builder =>
-                {
-                    builder
-                        .WithOrigins("http://productionwebsite.com")
-                        .AllowAnyHeader()
-                        .AllowAnyMethod()
-                        .AllowCredentials();
-                }
-            );
-        }
-    )
-);
+var connString = builder.Configuration.GetConnectionString("AZURE_SQL_CONNECTION");
+builder.Services.AddSqlServer<DataContextEf>(connString);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-else
-{
-    app.UseCors("ProdCorsPolicy");
-    app.UseHttpsRedirection();
-}
-
-app.UseHttpsRedirection();
+// Register the ProjectsEndpoints
+app.MapProjectsEndpoints();
 
 // Migrate the database
 await app.MigrateDbAsync();

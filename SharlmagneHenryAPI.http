@@ -1,6 +1,28 @@
 @SharlmagneHenryAPI_HostAddress = http://localhost:5194
 
-GET {{SharlmagneHenryAPI_HostAddress}}/weatherforecast/
-Accept: application/json
+### Get all projects
+GET {{SharlmagneHenryAPI_HostAddress}}/projects/
 
-###
+### Get project by id
+GET {{SharlmagneHenryAPI_HostAddress}}/projects/1
+
+### Create project
+POST {{SharlmagneHenryAPI_HostAddress}}/projects/
+Content-Type: application/json
+
+{
+    "title": "Project 3",
+    "description": "Project 3 description"
+}
+
+### Update project
+PUT {{SharlmagneHenryAPI_HostAddress}}/projects/1
+Content-Type: application/json
+
+{
+    "title": "Project 1",
+    "description": "Project 1 description Edited"
+}
+
+### Delete project
+DELETE {{SharlmagneHenryAPI_HostAddress}}/projects/3
