@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace SharlmagneHenryAPI.Dtos;
+namespace SharlmagneHenryAPI.Dtos.Project;
 
 public record CreateProjectDto(
     [Required] [StringLength(50)] string Title,

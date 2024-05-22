@@ -12,14 +12,15 @@ using SharlmagneHenryAPI.Data;
 namespace SharlmagneHenryAPI.Data.Migrations
 {
     [DbContext(typeof(DataContextEf))]
-    [Migration("20240518025347_Skills")]
-    partial class Skills
+    [Migration("20240520230504_PortfolioSchemaInit")]
+    partial class PortfolioSchemaInit
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("PortfolioSchema")
                 .HasAnnotation("ProductVersion", "8.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
@@ -41,16 +42,11 @@ namespace SharlmagneHenryAPI.Data.Migrations
                     b.Property<int>("ProjectId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("Media");
+                    b.ToTable("Media", "PortfolioSchema");
                 });
 
             modelBuilder.Entity("SharlmagneHenryAPI.Models.Project", b =>
@@ -81,7 +77,7 @@ namespace SharlmagneHenryAPI.Data.Migrations
 
                     b.HasIndex("SkillId");
 
-                    b.ToTable("Projects");
+                    b.ToTable("Projects", "PortfolioSchema");
                 });
 
             modelBuilder.Entity("SharlmagneHenryAPI.Models.Skill", b =>
@@ -93,14 +89,13 @@ namespace SharlmagneHenryAPI.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("int");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int?>("ParentId")
                         .HasColumnType("int");
@@ -109,7 +104,7 @@ namespace SharlmagneHenryAPI.Data.Migrations
 
                     b.HasIndex("ParentId");
 
-                    b.ToTable("Skills");
+                    b.ToTable("Skills", "PortfolioSchema");
                 });
 
             modelBuilder.Entity("SharlmagneHenryAPI.Models.Media", b =>

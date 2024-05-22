@@ -1,5 +1,7 @@
 @SharlmagneHenryAPI_HostAddress = http://localhost:5194
 
+## Project Endpoints
+
 ### Get all projects
 GET {{SharlmagneHenryAPI_HostAddress}}/projects/
 
@@ -26,3 +28,34 @@ Content-Type: application/json
 
 ### Delete project
 DELETE {{SharlmagneHenryAPI_HostAddress}}/projects/3
+
+
+## Skills Endpoints
+
+
+### Get all skills
+GET {{SharlmagneHenryAPI_HostAddress}}/skills?include=children
+
+### Get skill by id
+GET {{SharlmagneHenryAPI_HostAddress}}/skills/5?include=children
+
+### Create skill
+POST {{SharlmagneHenryAPI_HostAddress}}/skills/
+Content-Type: application/json
+
+{
+    "name": "Child Skill 4",
+    "description": "Child skill 3 description"
+}
+
+### Update skill
+#PUT {{SharlmagneHenryAPI_HostAddress}}/skills/1
+#Content-Type: application/json
+#
+#{
+#    "name": "Skill 1",
+#    "description": "Skill 1 description Edited"
+#}
+
+### Delete skill
+DELETE {{SharlmagneHenryAPI_HostAddress}}/skills/4

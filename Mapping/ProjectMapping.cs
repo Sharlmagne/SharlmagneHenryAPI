@@ -1,4 +1,5 @@
 using SharlmagneHenryAPI.Dtos;
+using SharlmagneHenryAPI.Dtos.Project;
 using SharlmagneHenryAPI.Models;
 
 namespace SharlmagneHenryAPI.Mapping;
@@ -26,8 +27,8 @@ public static class ProjectMapping
         };
     }
 
-    public static ProjectDetailsDto ToDto(this Project project)
+    public static ProjectDto ToDto(this Project project)
     {
-        return new ProjectDetailsDto(project.Id, project.Title, project.Description, project.Link);
+        return new ProjectDto(project.Id, project.Title, project.Description, project.Link);
     }
 }

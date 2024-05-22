@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SharlmagneHenryAPI.Data;
 using SharlmagneHenryAPI.Dtos;
+using SharlmagneHenryAPI.Dtos.Project;
 using SharlmagneHenryAPI.Mapping;
 using SharlmagneHenryAPI.Models;
 
