@@ -12,5 +12,11 @@ public class DataContextEf(DbContextOptions<DataContextEf> options) : DbContext(
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("PortfolioSchema");
+
+        modelBuilder
+            .Entity<Project>()
+            .HasMany(p => p.Skills)
+            .WithMany(s => s.Projects)
+            .UsingEntity(j => j.ToTable("ProjectSkills"));
     }
 }

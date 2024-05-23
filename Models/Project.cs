@@ -16,5 +16,9 @@ public class Project
     public string? Link { get; set; }
 
     // Navigation property for referencing associated Media objects
-    public ICollection<Media>? Media { get; set; } = new List<Media>();  // Initialize empty list
+    public ICollection<Media>? Media { get; set; } = new List<Media>();
+
+    // Navigation property for linking associated Skills
+    public ICollection<Skill> Skills { get; set; } = new List<Skill>();
+
 }

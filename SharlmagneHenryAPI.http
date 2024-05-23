@@ -13,8 +13,8 @@ POST {{SharlmagneHenryAPI_HostAddress}}/projects/
 Content-Type: application/json
 
 {
-    "title": "Project 3",
-    "description": "Project 3 description"
+    "title": "Project 1",
+    "description": "Project 1 description"
 }
 
 ### Update project
@@ -34,10 +34,10 @@ DELETE {{SharlmagneHenryAPI_HostAddress}}/projects/3
 
 
 ### Get all skills
-GET {{SharlmagneHenryAPI_HostAddress}}/skills
+GET {{SharlmagneHenryAPI_HostAddress}}/skills?include=projects
 
 ### Get skill by id
-GET {{SharlmagneHenryAPI_HostAddress}}/skills/5?include=children
+GET {{SharlmagneHenryAPI_HostAddress}}/skills/5?include=projects
 
 ### Create skill
 POST {{SharlmagneHenryAPI_HostAddress}}/skills/
@@ -59,3 +59,10 @@ Content-Type: application/json
 
 ### Delete skill
 DELETE {{SharlmagneHenryAPI_HostAddress}}/skills/4
+
+
+### Add project to skill
+PUT {{SharlmagneHenryAPI_HostAddress}}/skills/5/project/1
+
+### Remove project from skill
+DELETE {{SharlmagneHenryAPI_HostAddress}}/skills/5/project/1

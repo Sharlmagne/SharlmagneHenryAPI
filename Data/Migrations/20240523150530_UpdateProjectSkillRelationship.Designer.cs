@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SharlmagneHenryAPI.Data;
 
@@ -11,9 +12,11 @@ using SharlmagneHenryAPI.Data;
 namespace SharlmagneHenryAPI.Data.Migrations
 {
     [DbContext(typeof(DataContextEf))]
-    partial class DataContextEfModelSnapshot : ModelSnapshot
+    [Migration("20240523150530_UpdateProjectSkillRelationship")]
+    partial class UpdateProjectSkillRelationship
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

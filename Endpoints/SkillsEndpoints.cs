@@ -172,6 +172,63 @@ public static class SkillsEndpoints
             }
         );
 
+        // PUT /skills/{skillId}/project/{projectId}
+        group.MapPut(
+            "/{skillId}/project/{projectId}",
+            async (int skillId, int projectId, DataContextEf dbContext) =>
+            {
+                var skill = await dbContext
+                    .Skills.Include(s => s.Projects)
+                    .FirstOrDefaultAsync(s => s.Id == skillId);
+                var project = await dbContext
+                    .Projects.Include(p => p.Skills)
+                    .FirstOrDefaultAsync(p => p.Id == projectId);
+
+                if (skill is null || project is null)
+                {
+                    return Results.NotFound();
+                }
+
+                if (skill.Projects.Any(p => p.Id == projectId))
+                {
+                    return Results.BadRequest("Project already exists in skill!");
+                }
+
+                skill.Projects.Add(project);
+                project.Skills.Add(skill);
+
+                await dbContext.SaveChangesAsync();
+
+                return Results.Ok("Project added to skill successfully!");
+            }
+        );
+
+        // DELETE /skills/{skillId}/project/{projectId}
+        group.MapDelete(
+            "/{skillId}/project/{projectId}",
+            async (int skillId, int projectId, DataContextEf dbContext) =>
+            {
+                var skill = await dbContext
+                    .Skills.Include(s => s.Projects)
+                    .FirstOrDefaultAsync(s => s.Id == skillId);
+                var project = await dbContext
+                    .Projects.Include(p => p.Skills)
+                    .FirstOrDefaultAsync(p => p.Id == projectId);
+
+                if (skill is null || project is null)
+                {
+                    return Results.NotFound();
+                }
+
+                skill.Projects.Remove(project);
+                project.Skills.Remove(skill);
+
+                await dbContext.SaveChangesAsync();
+
+                return Results.Ok("Project removed from skill successfully!");
+            }
+        );
+
         return group;
     }
 }

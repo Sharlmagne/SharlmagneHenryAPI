@@ -17,8 +17,8 @@ public class Skill
     public Skill? Parent { get; set; }
 
     // Navigation property for referencing child skills
-    public ICollection<Skill> Children { get; set; } = new List<Skill>(); // Initialize empty list
+    public ICollection<Skill> Children { get; set; } = new List<Skill>();
 
     // Navigation property for linking associated Projects
-    public ICollection<Project> Projects { get; set; } = new List<Project>(); // Initialize empty list
+    public ICollection<Project> Projects { get; set; } = new List<Project>();
 }
