@@ -35,8 +35,8 @@ public static class SkillTreeBuilder
             }
         }
 
-        // Find the root node (ParentId is null)
-        var rootQuery = lookup[null].ToList()[0];
+        // Find the root node (first entry in the lookup)
+        var rootQuery = lookup.SelectMany(x => x).First();
 
         // Build the tree starting from the root node
         var root = new SkillTreeDto(

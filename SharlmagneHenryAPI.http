@@ -37,7 +37,7 @@ DELETE {{SharlmagneHenryAPI_HostAddress}}/projects/3
 GET {{SharlmagneHenryAPI_HostAddress}}/skills?include=projects
 
 ### Get skill by id
-GET {{SharlmagneHenryAPI_HostAddress}}/skills/5?include=projects
+GET {{SharlmagneHenryAPI_HostAddress}}/skills/5?include=children
 
 ### Create skill
 POST {{SharlmagneHenryAPI_HostAddress}}/skills/

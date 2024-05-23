@@ -29,7 +29,7 @@ public static class SkillsEndpoints
                 FROM
                     PortfolioSchema.Skills s
                 WHERE
-                    s.ParentId IS NULL
+                    s.Id = @Id
 
                 UNION ALL
 
@@ -44,12 +44,10 @@ public static class SkillsEndpoints
                 INNER JOIN
                     skill_tree st ON s.ParentId = st.Id
             )
-            SELECT * FROM skill_tree WHERE Id = @Id OR Path LIKE @PathPattern;";
 
-        var skills = await connection.QueryAsync<SkillTreeQueryDto>(
-            sql,
-            new { Id = id, PathPattern = $"{id}->%" }
-        );
+            SELECT * FROM skill_tree;";
+
+        var skills = await connection.QueryAsync<SkillTreeQueryDto>(sql, new { Id = id });
 
         return skills;
     }
