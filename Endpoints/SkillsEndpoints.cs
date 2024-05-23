@@ -139,6 +139,28 @@ public static class SkillsEndpoints
         );
 
         // PUT /skills/{id}
+        group.MapPut(
+            "/{id}",
+            async (int id, UpdateSkillDto updatedSkill, DataContextEf dbContext) =>
+            {
+                // Find the existing skill
+                var existingSkill = await dbContext.Skills.FindAsync(id);
+
+                if (existingSkill is null)
+                {
+                    return Results.NotFound();
+                }
+
+                // Convert the DTO to an entity
+                var skill = updatedSkill.ToEntity(id);
+
+                // Update the entity with the new values
+                dbContext.Entry(existingSkill).CurrentValues.SetValues(skill);
+                await dbContext.SaveChangesAsync();
+
+                return Results.Ok(skill.ToDto());
+            }
+        );
 
         // DELETE /skills/{id}
         group.MapDelete(

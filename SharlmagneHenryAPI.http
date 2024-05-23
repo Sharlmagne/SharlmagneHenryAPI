@@ -34,7 +34,7 @@ DELETE {{SharlmagneHenryAPI_HostAddress}}/projects/3
 
 
 ### Get all skills
-GET {{SharlmagneHenryAPI_HostAddress}}/skills?include=children
+GET {{SharlmagneHenryAPI_HostAddress}}/skills
 
 ### Get skill by id
 GET {{SharlmagneHenryAPI_HostAddress}}/skills/5?include=children
@@ -49,13 +49,13 @@ Content-Type: application/json
 }
 
 ### Update skill
-#PUT {{SharlmagneHenryAPI_HostAddress}}/skills/1
-#Content-Type: application/json
-#
-#{
-#    "name": "Skill 1",
-#    "description": "Skill 1 description Edited"
-#}
+PUT {{SharlmagneHenryAPI_HostAddress}}/skills/12
+Content-Type: application/json
+
+{
+    "name": "Child Skill 5",
+    "description": "Child Skill 5 description Edited"
+}
 
 ### Delete skill
 DELETE {{SharlmagneHenryAPI_HostAddress}}/skills/4

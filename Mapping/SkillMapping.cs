@@ -16,6 +16,17 @@ public static class SkillMapping
         };
     }
 
+    public static Skill ToEntity(this UpdateSkillDto dto, int id)
+    {
+        return new Skill
+        {
+            Id = id,
+            Name = dto.Name,
+            Description = dto.Description,
+            ParentId = dto.ParentId,
+        };
+    }
+
     public static SkillDto ToDto(this Skill skill)
     {
         return new SkillDto(
