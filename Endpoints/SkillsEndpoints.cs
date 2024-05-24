@@ -69,9 +69,17 @@ public static class SkillsEndpoints
             {
                 var skillsQuery = dbContext.Skills.AsQueryable();
 
-                if (include != null && includes.TryGetValue(include, out var includeFunc))
+                if (include != null)
                 {
-                    skillsQuery = includeFunc(skillsQuery);
+                    // Check if the include parameter contains "projects" or "children"
+                    if (include.Contains("projects"))
+                    {
+                        skillsQuery = includes["projects"](skillsQuery);
+                    }
+                    if (include.Contains("children"))
+                    {
+                        skillsQuery = includes["children"](skillsQuery);
+                    }
                 }
 
                 var skills = await skillsQuery
