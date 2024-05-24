@@ -30,4 +30,9 @@ public static class ProjectMapping
     {
         return new ProjectDto(project.Id, project.Title, project.Description, project.Link, project.Skills.Select(s => s.ToIncludeDto()).ToList());
     }
+
+    public static ProjectIncludeDto ToIncludeDto(this ProjectDto project)
+    {
+        return new ProjectIncludeDto(project.Id, project.Title, project.Description, project.Link);
+    }
 }

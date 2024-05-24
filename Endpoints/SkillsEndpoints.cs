@@ -1,10 +1,6 @@
-using System.Data;
-using Dapper;
-using Microsoft.EntityFrameworkCore;
-using SharlmagneHenryAPI.Data;
 using SharlmagneHenryAPI.Dtos.Skill;
 using SharlmagneHenryAPI.Mapping;
-using SharlmagneHenryAPI.Models;
+using SharlmagneHenryAPI.Services;
 
 namespace SharlmagneHenryAPI.Endpoints;
 
@@ -12,100 +8,16 @@ public static class SkillsEndpoints
 {
     private const string GetSkillsRouteName = "GetSkills";
 
-    private static async Task<IEnumerable<SkillTreeQueryDto>> GetSkillsAsync(
-        IDbConnection connection,
-        int id,
-        DataContextEf dbContext,
-        string? include
-    )
-    {
-        var sql =
-            @"
-        WITH skill_tree AS (
-            SELECT
-                s.Id,
-                s.Name,
-                s.Description,
-                s.ParentId,
-                CAST(s.Id AS VARCHAR(255)) AS Path
-            FROM
-                PortfolioSchema.Skills s
-            WHERE
-                s.Id = @Id
-
-            UNION ALL
-
-            SELECT
-                s.Id,
-                s.Name,
-                s.Description,
-                s.ParentId,
-                CAST(st.Path + '->' + CAST(s.Id AS VARCHAR(255)) AS VARCHAR(255))
-            FROM
-                PortfolioSchema.Skills s
-            INNER JOIN
-                skill_tree st ON s.ParentId = st.Id
-        )
-
-        SELECT * FROM skill_tree;";
-
-        var skills = await connection.QueryAsync<SkillTreeQueryDto>(sql, new { Id = id });
-
-        // if (include.Contains("projects"))
-        // {
-        //     var skillIds = skills.Select(s => s.Id).ToList();
-        //
-        //     var projects = await dbContext
-        //         .Projects
-        //         .Where(p => p.Skills.Any(s => skillIds.Contains(s.Id)))
-        //         .Select(p => p.ToDto())
-        //         .ToListAsync();
-        //
-        //     foreach (var skill in skills)
-        //     {
-        //         var projectList = projects.Where(p => p.Skills.Any(s => s.Id == skill.Id)).ToList();
-        //         skill.Projects = projectList;
-        //     }
-        // }
-
-        return skills;
-    }
-
     public static RouteGroupBuilder MapSkillsEndpoints(this WebApplication app)
     {
         var group = app.MapGroup("skills").WithParameterValidation();
 
-        var includes = new Dictionary<string, Func<IQueryable<Skill>, IQueryable<Skill>>>
-        {
-            ["projects"] = query => query.Include(skill => skill.Projects),
-            ["children"] = query => query.Include(skill => skill.Children)
-        };
-
         // GET /skills
         group.MapGet(
             "/",
-            async (DataContextEf dbContext, string? include) =>
+            async (string? include, SkillService skillService) =>
             {
-                var skillsQuery = dbContext.Skills.AsQueryable();
-
-                if (include != null)
-                {
-                    // Check if the include parameter contains "projects" or "children"
-                    if (include.Contains("projects"))
-                    {
-                        skillsQuery = includes["projects"](skillsQuery);
-                    }
-                    if (include.Contains("children"))
-                    {
-                        skillsQuery = includes["children"](skillsQuery);
-                    }
-                }
-
-                var skills = await skillsQuery
-                    .Select(skill => skill.ToDto())
-                    .AsNoTracking()
-                    .ToListAsync();
-
+                var skills = await skillService.GetSkillsAsync(include);
                 return Results.Ok(skills);
             }
         );
@@ -114,36 +26,20 @@ public static class SkillsEndpoints
         group
             .MapGet(
                 "/{id}",
-                async (int id, DataContextEf dbContext, string? include) =>
+                async (int id, string? include, SkillService skillService) =>
                 {
-                    // Start with a base query that selects from the Skills table
-                    var skillQuery = dbContext.Skills.AsQueryable();
-
                     // If the include parameter is provided and the includes dictionary contains the include key
 
-                    if (include != null)
+                    if (include != null && include.Contains("children"))
                     {
-                        if (include.Contains("children"))
-                        {
-                            var skills = await GetSkillsAsync(
-                                dbContext.Database.GetDbConnection(),
-                                id,
-                                dbContext,
-                                include
-                            );
-
-                            var skillTree = SkillTreeBuilder.BuildTree(skills.ToList());
-                            return Results.Ok(skillTree);
-                        }
-                        else if (include.Contains("projects"))
-                        {
-                            skillQuery = includes["projects"](skillQuery);
-                        }
+                        var skillTree = await skillService.GetSkillTree(id, include);
+                        return Results.Ok(skillTree);
                     }
-
-                    var skill = await skillQuery.FirstOrDefaultAsync(s => s.Id == id);
-
-                    return skill is not null ? Results.Ok(skill.ToDto()) : Results.NotFound();
+                    else
+                    {
+                        var skill = await skillService.GetSkillAsync(id, include);
+                        return skill is null ? Results.NotFound() : Results.Ok(skill);
+                    }
                 }
             )
             .WithName(GetSkillsRouteName);
@@ -151,11 +47,9 @@ public static class SkillsEndpoints
         // POST /skills
         group.MapPost(
             "/",
-            async (CreateSkillDto newSkill, DataContextEf dbContext) =>
+            async (CreateSkillDto newSkill, SkillService skillService) =>
             {
-                var skill = newSkill.ToEntity();
-                dbContext.Skills.Add(skill);
-                await dbContext.SaveChangesAsync();
+                var skill = await skillService.CreateSkillAsync(newSkill);
 
                 return Results.CreatedAtRoute(
                     GetSkillsRouteName,
@@ -168,33 +62,19 @@ public static class SkillsEndpoints
         // PUT /skills/{id}
         group.MapPut(
             "/{id}",
-            async (int id, UpdateSkillDto updatedSkill, DataContextEf dbContext) =>
+            async (int id, UpdateSkillDto updatedSkill, SkillService skillService) =>
             {
-                // Find the existing skill
-                var existingSkill = await dbContext.Skills.FindAsync(id);
-
-                if (existingSkill is null)
-                {
-                    return Results.NotFound();
-                }
-
-                // Convert the DTO to an entity
-                var skill = updatedSkill.ToEntity(id);
-
-                // Update the entity with the new values
-                dbContext.Entry(existingSkill).CurrentValues.SetValues(skill);
-                await dbContext.SaveChangesAsync();
-
-                return Results.Ok(skill.ToDto());
+                var skill = await skillService.UpdateSkillAsync(id, updatedSkill);
+                return skill is null ? Results.NotFound() : Results.Ok(skill.ToDto());
             }
         );
 
         // DELETE /skills/{id}
         group.MapDelete(
             "/{id}",
-            async (int id, DataContextEf dbContext) =>
+            async (int id, SkillService skillService) =>
             {
-                await dbContext.Skills.Where(skill => skill.Id == id).ExecuteDeleteAsync();
+                await skillService.DeleteSkillAsync(id);
                 return Results.Ok("Skill deleted successfully!");
             }
         );
@@ -202,57 +82,34 @@ public static class SkillsEndpoints
         // PUT /skills/{skillId}/project/{projectId}
         group.MapPatch(
             "/{skillId}/project/{projectId}",
-            async (int skillId, int projectId, DataContextEf dbContext) =>
+            async (int skillId, int projectId, SkillService skillService) =>
             {
-                var skill = await dbContext
-                    .Skills.Include(s => s.Projects)
-                    .FirstOrDefaultAsync(s => s.Id == skillId);
-                var project = await dbContext
-                    .Projects.Include(p => p.Skills)
-                    .FirstOrDefaultAsync(p => p.Id == projectId);
+                var result = await skillService.AddProjectToSkillAsync(skillId, projectId);
 
-                if (skill is null || project is null)
+                return result switch
                 {
-                    return Results.NotFound();
-                }
-
-                if (skill.Projects.Any(p => p.Id == projectId))
-                {
-                    return Results.BadRequest("Project already exists in skill!");
-                }
-
-                skill.Projects.Add(project);
-                project.Skills.Add(skill);
-
-                await dbContext.SaveChangesAsync();
-
-                return Results.Ok("Project added to skill successfully!");
+                    200 => Results.Ok("Project added to skill successfully!"),
+                    400 => Results.BadRequest("Project already exists in skill!"),
+                    404 => Results.NotFound(),
+                    _ => Results.Problem("An unexpected error occurred.")
+                };
             }
         );
 
         // DELETE /skills/{skillId}/project/{projectId}
         group.MapDelete(
             "/{skillId}/project/{projectId}",
-            async (int skillId, int projectId, DataContextEf dbContext) =>
+            async (int skillId, int projectId, SkillService skillService) =>
             {
-                var skill = await dbContext
-                    .Skills.Include(s => s.Projects)
-                    .FirstOrDefaultAsync(s => s.Id == skillId);
-                var project = await dbContext
-                    .Projects.Include(p => p.Skills)
-                    .FirstOrDefaultAsync(p => p.Id == projectId);
+                var result = await skillService.RemoveProjectFromSkillAsync(skillId, projectId);
 
-                if (skill is null || project is null)
+                return result switch
                 {
-                    return Results.NotFound();
-                }
-
-                skill.Projects.Remove(project);
-                project.Skills.Remove(skill);
-
-                await dbContext.SaveChangesAsync();
-
-                return Results.Ok("Project removed from skill successfully!");
+                    200 => Results.Ok("Project removed from skill successfully!"),
+                    400 => Results.BadRequest("Project does not exist in skill!"),
+                    404 => Results.NotFound(),
+                    _ => Results.Problem("An unexpected error occurred.")
+                };
             }
         );
 
