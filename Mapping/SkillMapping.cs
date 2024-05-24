@@ -35,11 +35,16 @@ public static class SkillMapping
             skill.Description,
             skill.ParentId,
             skill
-                .Projects.Select(p => new ProjectDto(p.Id, p.Title, p.Description, p.Link))
+                .Projects.Select(p => new ProjectIncludeDto(p.Id, p.Title, p.Description, p.Link))
                 .ToList(),
             skill
                 .Children.Select(c => c.ToDto()) // Recursively call ToDto for each child skill
                 .ToList()
         );
+    }
+
+    public static SkillIncludeDto ToIncludeDto(this Skill skill)
+    {
+        return new SkillIncludeDto(skill.Id, skill.Name, skill.Description, skill.ParentId);
     }
 }

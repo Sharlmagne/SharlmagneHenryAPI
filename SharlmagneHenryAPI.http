@@ -3,10 +3,10 @@
 ## Project Endpoints
 
 ### Get all projects
-GET {{SharlmagneHenryAPI_HostAddress}}/projects/
+GET {{SharlmagneHenryAPI_HostAddress}}/projects?include=skills
 
 ### Get project by id
-GET {{SharlmagneHenryAPI_HostAddress}}/projects/1
+GET {{SharlmagneHenryAPI_HostAddress}}/projects/1?include=skills
 
 ### Create project
 POST {{SharlmagneHenryAPI_HostAddress}}/projects/
@@ -37,7 +37,7 @@ DELETE {{SharlmagneHenryAPI_HostAddress}}/projects/3
 GET {{SharlmagneHenryAPI_HostAddress}}/skills?include=children,projects
 
 ### Get skill by id
-GET {{SharlmagneHenryAPI_HostAddress}}/skills/5?include=children
+GET {{SharlmagneHenryAPI_HostAddress}}/skills/5?include=children,projects
 
 ### Create skill
 POST {{SharlmagneHenryAPI_HostAddress}}/skills/

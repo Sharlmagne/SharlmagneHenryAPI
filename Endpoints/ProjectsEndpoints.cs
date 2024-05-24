@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using SharlmagneHenryAPI.Data;
-using SharlmagneHenryAPI.Dtos;
 using SharlmagneHenryAPI.Dtos.Project;
 using SharlmagneHenryAPI.Mapping;
 using SharlmagneHenryAPI.Models;
@@ -15,25 +14,61 @@ public static class ProjectsEndpoints
     {
         var group = app.MapGroup("projects").WithParameterValidation();
 
+        var includes = new Dictionary<string, Func<IQueryable<Project>, IQueryable<Project>>>
+        {
+            ["skills"] = query => query.Include(project => project.Skills),
+        };
+
         // GET /Projects
         group.MapGet(
             "/",
-            async (DataContextEf dbContext) =>
-                await dbContext
-                    .Projects.Select(project => project.ToDto())
+            async (DataContextEf dbContext, string? include) =>
+            {
+                var projectsQuery = dbContext.Projects.AsQueryable();
+
+                if (include != null)
+                {
+                    // Check if the include parameter contains "skills"
+                    if (include.Contains("skills"))
+                    {
+                        projectsQuery = includes["skills"](projectsQuery);
+                    }
+                }
+
+                var projects = await projectsQuery
+                    .Select(project => project.ToDto())
                     .AsNoTracking()
-                    .ToListAsync()
+                    .ToListAsync();
+
+                return Results.Ok(projects);
+            }
         );
 
         // GET /Projects/{id}
         group
             .MapGet(
                 "/{id}",
-                async (int id, DataContextEf dbContext) =>
+                async (int id, DataContextEf dbContext, string? include) =>
                 {
-                    var project = await dbContext.Projects.FindAsync(id);
+                    var projectsQuery = dbContext.Projects.Where(project => project.Id == id);
 
-                    return project is not null ? Results.Ok(project.ToDto()) : Results.NotFound();
+                    if (include != null)
+                    {
+                        // Check if the include parameter contains "skills"
+                        if (include.Contains("skills"))
+                        {
+                            projectsQuery = includes["skills"](projectsQuery);
+                        }
+                    }
+
+                    return
+                        await projectsQuery
+                            .Select(p => p.ToDto())
+                            .AsNoTracking()
+                            .FirstOrDefaultAsync()
+                            is { } projectDto
+                        ? Results.Ok(projectDto)
+                        : Results.NotFound();
                 }
             )
             .WithName(GetProjectRouteName);
@@ -43,7 +78,7 @@ public static class ProjectsEndpoints
             "/",
             async (CreateProjectDto newProject, DataContextEf dbContext) =>
             {
-                Project project = newProject.ToEntity();
+                var project = newProject.ToEntity();
                 dbContext.Projects.Add(project);
                 await dbContext.SaveChangesAsync();
 

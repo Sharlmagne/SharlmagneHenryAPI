@@ -7,6 +7,6 @@ public record SkillDto(
     string Name,
     string? Description,
     int? ParentId,
-    ICollection<ProjectDto>? Projects,
+    ICollection<ProjectIncludeDto>? Projects,
     ICollection<SkillDto>? Children
 );

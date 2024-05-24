@@ -28,6 +28,6 @@ public static class ProjectMapping
 
     public static ProjectDto ToDto(this Project project)
     {
-        return new ProjectDto(project.Id, project.Title, project.Description, project.Link);
+        return new ProjectDto(project.Id, project.Title, project.Description, project.Link, project.Skills.Select(s => s.ToIncludeDto()).ToList());
     }
 }

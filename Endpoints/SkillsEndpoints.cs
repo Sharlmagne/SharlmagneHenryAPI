@@ -14,40 +14,59 @@ public static class SkillsEndpoints
 
     private static async Task<IEnumerable<SkillTreeQueryDto>> GetSkillsAsync(
         IDbConnection connection,
-        int id
+        int id,
+        DataContextEf dbContext,
+        string? include
     )
     {
         var sql =
             @"
-            WITH skill_tree AS (
-                SELECT
-                    s.Id,
-                    s.Name,
-                    s.Description,
-                    s.ParentId,
-                    CAST(s.Id AS VARCHAR(255)) AS Path
-                FROM
-                    PortfolioSchema.Skills s
-                WHERE
-                    s.Id = @Id
+        WITH skill_tree AS (
+            SELECT
+                s.Id,
+                s.Name,
+                s.Description,
+                s.ParentId,
+                CAST(s.Id AS VARCHAR(255)) AS Path
+            FROM
+                PortfolioSchema.Skills s
+            WHERE
+                s.Id = @Id
 
-                UNION ALL
+            UNION ALL
 
-                SELECT
-                    s.Id,
-                    s.Name,
-                    s.Description,
-                    s.ParentId,
-                    CAST(st.Path + '->' + CAST(s.Id AS VARCHAR(255)) AS VARCHAR(255))
-                FROM
-                    PortfolioSchema.Skills s
-                INNER JOIN
-                    skill_tree st ON s.ParentId = st.Id
-            )
+            SELECT
+                s.Id,
+                s.Name,
+                s.Description,
+                s.ParentId,
+                CAST(st.Path + '->' + CAST(s.Id AS VARCHAR(255)) AS VARCHAR(255))
+            FROM
+                PortfolioSchema.Skills s
+            INNER JOIN
+                skill_tree st ON s.ParentId = st.Id
+        )
 
-            SELECT * FROM skill_tree;";
+        SELECT * FROM skill_tree;";
 
         var skills = await connection.QueryAsync<SkillTreeQueryDto>(sql, new { Id = id });
+
+        // if (include.Contains("projects"))
+        // {
+        //     var skillIds = skills.Select(s => s.Id).ToList();
+        //
+        //     var projects = await dbContext
+        //         .Projects
+        //         .Where(p => p.Skills.Any(s => skillIds.Contains(s.Id)))
+        //         .Select(p => p.ToDto())
+        //         .ToListAsync();
+        //
+        //     foreach (var skill in skills)
+        //     {
+        //         var projectList = projects.Where(p => p.Skills.Any(s => s.Id == skill.Id)).ToList();
+        //         skill.Projects = projectList;
+        //     }
+        // }
 
         return skills;
     }
@@ -102,21 +121,23 @@ public static class SkillsEndpoints
 
                     // If the include parameter is provided and the includes dictionary contains the include key
 
-                    if (include != null && includes.TryGetValue(include, out var includeFunc))
+                    if (include != null)
                     {
-                        if (include == "children")
+                        if (include.Contains("children"))
                         {
                             var skills = await GetSkillsAsync(
                                 dbContext.Database.GetDbConnection(),
-                                id
+                                id,
+                                dbContext,
+                                include
                             );
 
                             var skillTree = SkillTreeBuilder.BuildTree(skills.ToList());
                             return Results.Ok(skillTree);
                         }
-                        else
+                        else if (include.Contains("projects"))
                         {
-                            skillQuery = includeFunc(skillQuery);
+                            skillQuery = includes["projects"](skillQuery);
                         }
                     }
 
