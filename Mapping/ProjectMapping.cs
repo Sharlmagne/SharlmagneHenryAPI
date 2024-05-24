@@ -1,4 +1,3 @@
-using SharlmagneHenryAPI.Dtos;
 using SharlmagneHenryAPI.Dtos.Project;
 using SharlmagneHenryAPI.Models;
 

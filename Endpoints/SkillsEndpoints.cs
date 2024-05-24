@@ -171,7 +171,7 @@ public static class SkillsEndpoints
         );
 
         // PUT /skills/{skillId}/project/{projectId}
-        group.MapPut(
+        group.MapPatch(
             "/{skillId}/project/{projectId}",
             async (int skillId, int projectId, DataContextEf dbContext) =>
             {

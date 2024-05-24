@@ -49,20 +49,20 @@ Content-Type: application/json
 }
 
 ### Update skill
-PUT {{SharlmagneHenryAPI_HostAddress}}/skills/12
+PUT {{SharlmagneHenryAPI_HostAddress}}/skills/5
 Content-Type: application/json
 
 {
-    "name": "Child Skill 5",
-    "description": "Child Skill 5 description Edited"
+    "name": "Skill 1",
+    "description": "Skill 1 description Edited"
 }
 
 ### Delete skill
-DELETE {{SharlmagneHenryAPI_HostAddress}}/skills/4
+DELETE {{SharlmagneHenryAPI_HostAddress}}/skills/13
 
 
 ### Add project to skill
-PUT {{SharlmagneHenryAPI_HostAddress}}/skills/5/project/1
+PATCH {{SharlmagneHenryAPI_HostAddress}}/skills/5/project/1
 
 ### Remove project from skill
 DELETE {{SharlmagneHenryAPI_HostAddress}}/skills/5/project/1
