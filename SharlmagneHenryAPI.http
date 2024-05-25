@@ -62,7 +62,7 @@ DELETE {{SharlmagneHenryAPI_HostAddress}}/skills/14
 
 
 ### Add project to skill
-PATCH {{SharlmagneHenryAPI_HostAddress}}/skills/12/project/1
+POST {{SharlmagneHenryAPI_HostAddress}}/skills/12/projects/1
 
 ### Remove project from skill
-DELETE {{SharlmagneHenryAPI_HostAddress}}/skills/12/project/1
+DELETE {{SharlmagneHenryAPI_HostAddress}}/skills/12/projects/1

@@ -1,5 +1,6 @@
 using SharlmagneHenryAPI.Dtos.Skill;
 using SharlmagneHenryAPI.Mapping;
+using SharlmagneHenryAPI.Models;
 using SharlmagneHenryAPI.Services;
 
 namespace SharlmagneHenryAPI.Endpoints;
@@ -79,8 +80,8 @@ public static class SkillsEndpoints
             }
         );
 
-        // PUT /skills/{skillId}/project/{projectId}
-        group.MapPatch(
+        // POST /skills/{skillId}/projects/{projectId}
+        group.MapPost(
             "/{skillId}/project/{projectId}",
             async (int skillId, int projectId, SkillService skillService) =>
             {
@@ -96,7 +97,7 @@ public static class SkillsEndpoints
             }
         );
 
-        // DELETE /skills/{skillId}/project/{projectId}
+        // DELETE /skills/{skillId}/projects/{projectId}
         group.MapDelete(
             "/{skillId}/project/{projectId}",
             async (int skillId, int projectId, SkillService skillService) =>
